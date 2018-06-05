@@ -10,7 +10,9 @@ class App extends Component {
         </header>
         <div id="displayPoints"></div>
         <div id="map"></div>
+        <script src='https://api.mapbox.com/mapbox-assembly/mbx/v0.18.0/assembly.js'></script>
       </div>
+      
     );
   }
 }
