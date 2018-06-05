@@ -4,7 +4,10 @@
   "private": true,
   "dependencies": {
     "@turf/meta": "^6.0.2",
+    "d3-request": "^1.0.6",
+    "d3-scale": "^2.0.0",
     "geojson-elevation": "^1.1.1",
+    "immutable": "^3.8.2",
     "mapbox": "^1.0.0-beta10",
     "mapbox-gl": "^0.45.0",
     "react": "^16.4.0",

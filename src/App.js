@@ -2,14 +2,67 @@ import React, { Component } from 'react';
 import { render } from 'react-dom';
 import ReactMapGl from 'react-map-gl';
 import './App.css';
+import {json as requestJson} from 'd3-request';
+import ReactDOM from 'react-dom';
+import {fromJS} from 'immutable';
+// import MAP_STYLE from 'map-style-basic-v8.json';
+import {range} from 'd3-array';
+import {scaleQuantile} from 'd3-scale';
+
+export function updatePercentiles(featureCollection, accessor) {
+  const {features} = featureCollection;
+  const scale = scaleQuantile().domain(features.map(accessor)).range(range(9));
+  features.forEach(f => {
+    const value = accessor(f);
+    f.properties.value = value;
+    f.properties.percentile = scale(value);
+  });
+}
+
+// For more information on data-driven styles, see https://www.mapbox.com/help/gl-dds-ref/
+export const dataLayer = fromJS({
+  id: 'data',
+  source: 'incomeByState',
+  type: 'fill',
+  interactive: true,
+  paint: {
+    'fill-color': {
+      property: 'percentile',
+      stops: [
+        [0, '#3288bd'],
+        [1, '#66c2a5'],
+        [2, '#abdda4'],
+        [3, '#e6f598'],
+        [4, '#ffffbf'],
+        [5, '#fee08b'],
+        [6, '#fdae61'],
+        [7, '#f46d43'],
+        [8, '#d53e4f']
+      ]
+    },
+    'fill-opacity': 0.8
+  }
+});
+
+export const defaultMapStyle = fromJS(MAP_STYLE);
 
 const MAPBOX_TOKEN = 
 'pk.eyJ1Ijoibm1hc3RyYWNjaSIsImEiOiJjamkwanM3ZTkxOHl1M2twZGtxbXlkbHVhIn0.8FA150ofp_Ai4ANsDpYlDg';
 
+function Welcome(props) {
+      return <h1>Hello, {props.name}</h1>;
+  }
+  
+  const element = <Welcome name="Natalie"/>;
+  ReactDOM.render(
+      element,
+      document.querySelector('#displayPoints')
+  );
+
 class App extends Component {
 
   state = {
-    mapStyle: deafultMapStyle,
+    mapStyle: defaultMapStyle,
     viewport: {
       latitude: 40,
       longitude: -100,
@@ -24,29 +77,12 @@ class App extends Component {
   };
 
   componentDidMount() {
-    window.addEventListener('resize', this._resize);
-    this._resize();
-
     requestJson('data/us-income.geojson', (error, response) => {
       if (!error) {
         this._loadData(response);
       }
     });
   }
-
-  componentWillUnmount() {
-    window.removeEventListener('resize', this._resize);
-  }
-
-  _resize = () => {
-    this.setState({
-      viewport: {
-        ...this.state.viewport,
-        width: this.props.width || window.innerWidth,
-        height: this.props.height || window.innerHeight
-      }
-    });
-  };
 
   _loadData = data => {
 
